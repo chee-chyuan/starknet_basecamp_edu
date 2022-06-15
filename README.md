@@ -1,4 +1,6 @@
-# Toy Example to Get Graduation Eligibility from Basecamp Cohort 0
+ [![Test](https://github.com/chee-chyuan/starknet_basecamp_edu/actions/workflows/tests.yml/badge.svg)](https://github.com/chee-chyuan/starknet_basecamp_edu/actions/workflows/tests.yml)
+ 
+ # Toy Example to Get Graduation Eligibility from Basecamp Cohort 0
 
 ## Moderator's role
 1. Deployer of the contract will be the `moderator`
