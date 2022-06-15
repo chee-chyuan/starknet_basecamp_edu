@@ -4,7 +4,18 @@ protostar_version = "0.2.3"
 ["protostar.project"]
 libs_path = "lib"
 
+["protostar.shared_command_configs"]
+cairo_path = ["./lib/cairo_contracts/src", "src"]
+
+[profile.ci.protostar.shared_command_configs]
+no_color=true
+cairo_path = ["./lib/cairo_contracts/src"]
+target = "src"
+
 ["protostar.contracts"]
 basecamp_cohort_0 = [
   "./src/basecamp_cohort_0.cairo",
+]
+basecamp_erc721 = [
+  "./src/tokens/basecamp/starknetbasecamp.cairo"
 ]

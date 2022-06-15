@@ -1,0 +1,22 @@
+name: Tests
+
+on:
+  pull_request:
+
+jobs:
+  protostar-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install protostar
+        run: |
+          curl -L https://raw.githubusercontent.com/software-mansion/protostar/master/install.sh | bash
+      - name: Update env variables
+        run: |
+          source /home/runner/.bashrc | bash
+      - name: Install protostar dependencies
+        run: /home/runner/.protostar/dist/protostar/protostar install
+      - name: Compile smart contracts
+        run: /home/runner/.protostar/dist/protostar/protostar build --cairo-path lib/cairo_contracts/src
+      - name: Run protostar tests
+        run: /home/runner/.protostar/dist/protostar/protostar test tests/ --cairo-path lib/cairo_contracts/src

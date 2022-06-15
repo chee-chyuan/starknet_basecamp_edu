@@ -2,7 +2,9 @@
 
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.starknet.common.syscalls import get_caller_address
-from starkware.cairo.common.uint256 import Uint256, uint256_eq
+from starkware.cairo.common.uint256 import Uint256, uint256_eq, uint256_add
+from starkware.cairo.common.bool import TRUE, FALSE
+from src.interfaces.Istarknetbasecamp import IStarknetBaseCamp
 from src.IERC20 import IERC20
 
 # const BRIDGE_MESSAGING_ERC20 = 794476629470482898616577431597553571361942706809174013646454877410188598265
@@ -30,6 +32,14 @@ end
 
 @storage_var
 func required_points(erc_address:felt) -> (res:Uint256):
+end
+
+@storage_var
+func starknet_basecamp_address_() -> (address:felt):
+end
+
+@storage_var
+func claimed_token_(address: felt) -> (res:felt):
 end
 
 @constructor
@@ -103,6 +113,66 @@ func student_register{syscall_ptr:felt*, pedersen_ptr: HashBuiltin*, range_check
     let (student_address) = get_caller_address()
     registered_users.write(student_address, 1)
     return ()
+end
+
+@external
+func set_starknet_basecamp_address{syscall_ptr:felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(address: felt):
+    only_moderator()
+    starknet_basecamp_address_.write(address)
+    return ()
+end
+
+@external
+func mint_basecamp_token{syscall_ptr:felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+):
+    alloc_locals
+
+    let (student_address) = get_caller_address()
+
+    # Make sure the student finished the course
+    let (completed) = is_complete_course(student_address)
+    with_attr error_message("Cohort: Student has not completed the course"):
+        assert completed = TRUE
+    end
+
+    # Make sure the student doesn't have a token yet
+    let (token_address) = starknet_basecamp_address_.read()
+    let (balance) = IStarknetBaseCamp.balanceOf(token_address, student_address)
+    let (is_equal) = uint256_eq(balance, Uint256(0,0))
+    with_attr error_message("Cohort: Student already has a token"):
+        assert is_equal = TRUE
+    end
+
+    # Make sure the student haven't claimed yet
+    let (token_claimed) = claimed_token_.read(student_address)
+    with_attr error_message("Cohort: Student already claimed"):
+        assert token_claimed = FALSE
+    end
+
+    # Mint the token to the student
+    let (total_supply) = IStarknetBaseCamp.totalSupply(token_address)
+    let next_token_id : Uint256 = uint256_add(total_supply, Uint256(1,0))
+    IStarknetBaseCamp.mint(
+        contract_address=token_address,
+        to=student_address,
+        token_id=next_token_id,
+    )
+
+    # Write claim status to the storage
+    claimed_token_.write(student_address, TRUE)
+    return ()
+end
+
+@view
+func starknet_basecamp_address{syscall_ptr:felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() -> (res:felt):
+    let (starknet_basecamp_address) = starknet_basecamp_address_.read()
+    return (res=starknet_basecamp_address)
+end
+
+@view
+func claimed_token{syscall_ptr:felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(address: felt) -> (bool:felt):
+    let (bool) = claimed_token_.read(address)
+    return (bool)
 end
 
 @view

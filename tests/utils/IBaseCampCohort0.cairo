@@ -51,4 +51,15 @@ namespace IBaseCampCohort0:
     ) -> (res:felt):
     end
 
+    func set_starknet_basecamp_address(address: felt):
+    end
+
+    func starknet_basecamp_address() -> (res:felt):
+    end
+
+    func mint_basecamp_token():
+    end
+
+    func claimed_token(address: felt) -> (bool:felt):
+    end
 end
